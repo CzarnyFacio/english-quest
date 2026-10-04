@@ -1298,7 +1298,742 @@ render();
 
 draw();
 
-</script>
+</script>/* =========================
+🏙️ CITY BUILDER 4.1 PATCH
+========================= */
+
+if(!S.city){
+
+S.city={
+buildings:{},
+population:0,
+reputation:0,
+lastIncome:"",
+decorations:[]
+};
+
+}
+
+if(!S.city.buildings)
+S.city.buildings={};
+
+if(!S.city.decorations)
+S.city.decorations=[];
+
+
+const CITY_BUILDINGS=[
+
+{
+id:"house",
+icon:"🏠",
+name:"House",
+cost:100,
+unlock:2,
+pop:10,
+rep:2,
+desc:"+10 mieszkańców"
+},
+
+{
+id:"school",
+icon:"📚",
+name:"School",
+cost:250,
+unlock:3,
+pop:20,
+rep:8,
+skill:"Grammar",
+bonus:.05,
+desc:"+5% XP Grammar"
+},
+
+{
+id:"market",
+icon:"🏪",
+name:"Market",
+cost:400,
+unlock:4,
+pop:15,
+rep:12,
+income:10,
+desc:"+10 Gold dziennie"
+},
+
+{
+id:"studio",
+icon:"🎬",
+name:"Film Studio",
+cost:300,
+unlock:5,
+pop:20,
+rep:20,
+skill:"Videographer",
+bonus:.10,
+desc:"+10% XP Videographer"
+},
+
+{
+id:"hotel",
+icon:"🏨",
+name:"Hotel",
+cost:600,
+unlock:7,
+pop:30,
+rep:30,
+income:15,
+desc:"+15 Gold dziennie"
+},
+
+{
+id:"airport",
+icon:"✈️",
+name:"Airport",
+cost:1000,
+unlock:10,
+pop:50,
+rep:60,
+income:30,
+desc:"+30 Gold dziennie"
+},
+
+{
+id:"office",
+icon:"🏢",
+name:"Office",
+cost:1500,
+unlock:12,
+pop:60,
+rep:80,
+income:25,
+desc:"+25 Gold dziennie"
+},
+
+{
+id:"stadium",
+icon:"🏟️",
+name:"Stadium",
+cost:2200,
+unlock:15,
+pop:100,
+rep:120,
+desc:"+100 mieszkańców"
+},
+
+{
+id:"castle",
+icon:"🏰",
+name:"Castle",
+cost:4000,
+unlock:20,
+pop:150,
+rep:220,
+desc:"+220 Reputation"
+},
+
+{
+id:"dragon",
+icon:"🐉",
+name:"Dragon Tower",
+cost:8000,
+unlock:25,
+pop:250,
+rep:500,
+desc:"Legendarny budynek"
+}
+
+];
+
+
+function cityRecalc(){
+
+let pop=0;
+let rep=0;
+
+CITY_BUILDINGS.forEach(b=>{
+
+let level=S.city.buildings[b.id]||0;
+
+pop+=b.pop*level;
+rep+=b.rep*level;
+
+});
+
+S.city.population=pop;
+S.city.reputation=rep;
+
+save();
+
+}
+
+
+function cityName(){
+
+if(S.city.population>=1000)
+return "🐉 Dragon City";
+
+if(S.city.population>=600)
+return "👑 Royal Capital";
+
+if(S.city.population>=300)
+return "🌍 International City";
+
+if(S.city.population>=150)
+return "💼 Business City";
+
+if(S.city.population>=60)
+return "🎨 Creative City";
+
+if(S.city.population>=20)
+return "🏘️ Growing Town";
+
+return "🏕️ English Village";
+
+}
+
+
+function cityIncome(){
+
+let income=0;
+
+CITY_BUILDINGS.forEach(b=>{
+
+let level=S.city.buildings[b.id]||0;
+
+if(b.income)
+income+=b.income*level;
+
+});
+
+return income;
+
+}
+
+
+function cityBonus(skill){
+
+let bonus=0;
+
+CITY_BUILDINGS.forEach(b=>{
+
+if(b.skill===skill){
+
+let level=S.city.buildings[b.id]||0;
+
+bonus+=(b.bonus||0)*level;
+
+}
+
+});
+
+return 1+bonus;
+
+}
+
+
+function buildCity(id){
+
+const b=CITY_BUILDINGS.find(x=>x.id===id);
+
+if(!b)return;
+
+let current=S.city.buildings[id]||0;
+
+if(current>=3){
+
+alert("🏆 Ten budynek ma już maksymalny poziom!");
+
+return;
+
+}
+
+if(S.level<b.unlock){
+
+alert(
+"🔒 Ten budynek odblokuje się na Level "+
+b.unlock+
+"\n\nTwój Level: "+
+S.level
+);
+
+return;
+
+}
+
+let next=current+1;
+
+let cost=
+next===1
+?b.cost
+:Math.round(b.cost*next*1.5);
+
+
+if(S.gold<cost){
+
+alert(
+"💰 Za mało Gold!\n\n"+
+"Potrzebujesz: "+cost+
+"\nMasz: "+S.gold
+);
+
+return;
+
+}
+
+
+/* wymagania językowe */
+
+if(next>=2 && b.skill==="Grammar"){
+
+let required=15*next;
+
+if(S.skills.Grammar<required){
+
+alert(
+"📚 SCHOOL UPGRADE\n\n"+
+"Potrzebujesz "+required+
+" Grammar XP.\n\n"+
+"Masz: "+S.skills.Grammar
+);
+
+return;
+
+}
+
+}
+
+
+if(next>=2 && b.skill==="Videographer"){
+
+let required=20*next;
+
+if(S.skills.Videographer<required){
+
+alert(
+"🎬 FILM STUDIO UPGRADE\n\n"+
+"Potrzebujesz "+required+
+" Videographer XP.\n\n"+
+"Masz: "+S.skills.Videographer
+);
+
+return;
+
+}
+
+}
+
+
+S.gold-=cost;
+
+S.city.buildings[id]=next;
+
+cityRecalc();
+
+alert(
+
+current===0
+
+?
+
+"🏗️ ZBUDOWANO!\n\n"+
+b.icon+" "+b.name+
+"\n\nLevel 1"
+
+:
+
+"⬆️ ULEPSZONO!\n\n"+
+b.icon+" "+b.name+
+"\n\nLevel "+next
+
+);
+
+renderCity();
+
+draw();
+
+}
+
+
+function collectCityIncome(){
+
+let today=new Date().toDateString();
+
+if(S.city.lastIncome===today){
+
+alert(
+"💰 Dzisiejszy dochód został już odebrany!"
+);
+
+return;
+
+}
+
+let income=cityIncome();
+
+if(income<=0){
+
+alert(
+"🏙️ Najpierw zbuduj Market, Hotel, Airport albo Office."
+);
+
+return;
+
+}
+
+S.gold+=income;
+
+S.city.lastIncome=today;
+
+save();
+
+alert(
+"💰 CITY INCOME!\n\n"+
+"+"+income+" Gold"
+);
+
+draw();
+
+renderCity();
+
+}
+
+
+function cityTab(button){
+
+document
+.querySelectorAll(".tab")
+.forEach(x=>x.classList.remove("active"));
+
+button.classList.add("active");
+
+[
+"battle",
+"map",
+"shop",
+"hero",
+"city41"
+].forEach(id=>{
+
+let el=document.getElementById(id);
+
+if(el)el.classList.add("hidden");
+
+});
+
+document
+.getElementById("city41")
+.classList.remove("hidden");
+
+renderCity();
+
+}
+
+
+function renderCity(){
+
+cityRecalc();
+
+let income=cityIncome();
+
+document.getElementById("city41").innerHTML=`
+
+<div class="card">
+
+<h2>🏙️ ${cityName()}</h2>
+
+<div class="item">
+
+👥 Population:
+<b>${S.city.population}</b>
+
+<br>
+
+⭐ Reputation:
+<b>${S.city.reputation}</b>
+
+<br>
+
+🏗️ Budynki:
+<b>${
+Object.keys(S.city.buildings).length
+}</b>
+
+</div>
+
+<div class="item">
+
+💰 Dzienny dochód:
+<b>+${income} Gold</b>
+
+<br><br>
+
+<button
+class="next"
+onclick="collectCityIncome()">
+
+💰 Odbierz dochód
+
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>🏗️ Buduj swoje miasto</h2>
+
+${CITY_BUILDINGS.map(b=>{
+
+let level=S.city.buildings[b.id]||0;
+
+let next=level+1;
+
+let cost=
+next===1
+?b.cost
+:Math.round(b.cost*next*1.5);
+
+let locked=S.level<b.unlock;
+
+return `
+
+<div class="item"
+style="text-align:center;">
+
+<div style="font-size:45px">
+${b.icon}
+</div>
+
+<b>${b.name}</b>
+
+<br>
+
+<span class="muted">
+
+Level ${level}/3
+
+<br>
+
+${b.desc}
+
+<br>
+
+🔓 Level ${b.unlock}
+
+</span>
+
+${
+level>=3
+
+?
+
+`<button
+class="next"
+disabled>
+
+🏆 MAX LEVEL
+
+</button>`
+
+:
+
+locked
+
+?
+
+`<button
+class="next"
+disabled>
+
+🔒 Level ${b.unlock}
+
+</button>`
+
+:
+
+`<button
+class="next"
+onclick="buildCity('${b.id}')">
+
+${level===0?"🏗️ BUILD":"⬆️ UPGRADE"}
+
+<br>
+
+💰 ${cost} Gold
+
+</button>`
+
+}
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+
+
+<div class="card">
+
+<h2>🏘️ Dzielnice</h2>
+
+<div class="item">
+
+🏕️ Village
+
+<br>
+
+🔓 Start
+
+</div>
+
+<div class="item ${
+S.city.population>=20?"":"locked"
+}">
+
+🏘️ Residential District
+
+<br>
+
+${
+S.city.population>=20
+?"✅ UNLOCKED"
+:"🔒 20 Population"
+}
+
+</div>
+
+<div class="item ${
+S.city.population>=60?"":"locked"
+}">
+
+🎨 Creative District
+
+<br>
+
+${
+S.city.population>=60
+?"✅ UNLOCKED"
+:"🔒 60 Population"
+}
+
+</div>
+
+<div class="item ${
+S.city.population>=150?"":"locked"
+}">
+
+💼 Business District
+
+<br>
+
+${
+S.city.population>=150
+?"✅ UNLOCKED"
+:"🔒 150 Population"
+}
+
+</div>
+
+<div class="item ${
+S.city.population>=300?"":"locked"
+}">
+
+🌍 International District
+
+<br>
+
+${
+S.city.population>=300
+?"✅ UNLOCKED"
+:"🔒 300 Population"
+}
+
+</div>
+
+<div class="item ${
+S.city.population>=600?"":"locked"
+}">
+
+👑 Royal District
+
+<br>
+
+${
+S.city.population>=600
+?"✅ UNLOCKED"
+:"🔒 600 Population"
+}
+
+</div>
+
+<div class="item ${
+S.city.population>=1000?"":"locked"
+}">
+
+🐉 Dragon District
+
+<br>
+
+${
+S.city.population>=1000
+?"✅ UNLOCKED"
+:"🔒 1000 Population"
+}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* dodajemy zakładkę CITY */
+
+(function(){
+
+if(document.getElementById("city41"))
+return;
+
+
+/* przycisk */
+
+const tabs=document.querySelector(".tabs");
+
+const cityButton=document.createElement("button");
+
+cityButton.className="tab";
+
+cityButton.innerHTML="🏙️ City";
+
+cityButton.onclick=function(){
+
+cityTab(this);
+
+};
+
+tabs.appendChild(cityButton);
+
+
+/* ekran */
+
+const section=document.createElement("section");
+
+section.id="city41";
+
+section.className="hidden";
+
+document
+.querySelector(".app")
+.appendChild(section);
+
+cityRecalc();
+
+})();
 
 </body>
 </html>
