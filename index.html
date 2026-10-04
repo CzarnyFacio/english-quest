@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Quest</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ background:#090d16;
+ color:#fff;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.app{max-width:600px;margin:auto;padding:16px}
+.header{
+ background:linear-gradient(135deg,#171d32,#101625);
+ border:1px solid #29334d;
+ border-radius:22px;
+ padding:18px;
+ margin-bottom:12px;
+}
+.title{font-size:28px;font-weight:800}
+.sub{color:#9ba6bd;margin-top:4px}
+.stats{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:7px;
+ margin-top:16px;
+}
+.stat{
+ background:#0b101c;
+ border-radius:12px;
+ padding:9px 5px;
+ text-align:center;
+ font-size:12px;
+ color:#9ca8bd;
+}
+.stat b{display:block;color:white;font-size:16px;margin-top:2px}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.tab{
+ border:0;border-radius:12px;padding:11px 3px;
+ background:#171d2b;color:#9ca8bd;font-weight:700;
+}
+.tab.active{background:#6c5ce7;color:white}
+
+.card{
+ background:#111827;
+ border:1px solid #263149;
+ border-radius:20px;
+ padding:18px;
+ margin-bottom:12px;
+}
+.enemy{text-align:center;font-size:65px}
+.enemyName{text-align:center;font-weight:800;font-size:20px}
+.hpbar,.xpbar{
+ height:12px;background:#252c3c;border-radius:20px;
+ overflow:hidden;margin:10px 0;
+}
+.hpfill{height:100%;background:#ef476f;transition:.3s}
+.xpfill{height:100%;background:#7c5cff;transition:.3s}
+.question{
+ font-size:21px;font-weight:750;
+ line-height:1.4;text-align:center;margin:20px 0;
+}
+.answers{display:grid;gap:10px}
+.answer{
+ border:1px solid #33405d;
+ background:#1a2233;color:white;
+ border-radius:14px;padding:15px;
+ font-size:16px;font-weight:650;
+}
+.answer:active{transform:scale(.98)}
+.answer:disabled{opacity:.55}
+.feedback{
+ margin-top:14px;border-radius:15px;padding:15px;
+ line-height:1.5;
+}
+.good{background:#103b2d;border:1px solid #1d7956}
+.bad{background:#421c28;border:1px solid #8f304b}
+.next{
+ width:100%;margin-top:14px;padding:17px;
+ border:0;border-radius:15px;
+ background:#7c5cff;color:#fff;
+ font-size:18px;font-weight:800;
+}
+.sectionTitle{font-size:20px;font-weight:800;margin-bottom:12px}
+.item{
+ background:#181f30;border:1px solid #2b3650;
+ padding:13px;border-radius:13px;margin-bottom:8px;
+}
+.locked{opacity:.45}
+.small{color:#9ca8bd;font-size:13px}
+.hidden{display:none}
+button{cursor:pointer}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<div class="header">
+ <div class="title">⚔️ English Quest</div>
+ <div class="sub">Maks — A2 Adventurer</div>
+
+ <div class="stats">
+  <div class="stat">LEVEL<b id="level">2</b></div>
+  <div class="stat">💰 GOLD<b id="gold">150</b></div>
+  <div class="stat">❤️ HP<b id="hp">100</b></div>
+  <div class="stat">🔥 COMBO<b id="combo">0</b></div>
+ </div>
+</div>
+
+<div class="tabs">
+ <button class="tab active" onclick="showTab('battle',this)">⚔️ Battle</button>
+ <button class="tab" onclick="showTab('map',this)">🗺️ Map</button>
+ <button class="tab" onclick="showTab('shop',this)">🏪 Shop</button>
+ <button class="tab" onclick="showTab('hero',this)">🧙 Hero</button>
+</div>
+
+<div id="battle">
+
+<div class="card">
+ <div class="enemy" id="enemyEmoji">👺</div>
+ <div class="enemyName" id="enemyName">Grammar Goblin</div>
+
+ <div class="hpbar">
+  <div class="hpfill" id="enemyHP"></div>
+ </div>
+
+ <div class="small" style="text-align:center" id="enemyText">
+  100 / 100 HP
+ </div>
+</div>
+
+<div class="card">
+ <div class="small">QUEST • Grammar Forest</div>
+ <div class="question" id="question"></div>
+
+ <div class="answers" id="answers"></div>
+
+ <div id="feedback"></div>
+</div>
+
+<div class="card">
+ <div class="small">XP</div>
+ <div class="xpbar">
+  <div class="xpfill" id="xpbar"></div>
+ </div>
+ <div class="small" id="xpText">10 / 100 XP</div>
+</div>
+
+</div>
+
+<div id="map" class="hidden">
+<div class="card">
+ <div class="sectionTitle">🗺️ Mapa świata</div>
+
+ <div class="item">🌲 <b>Grammar Forest</b><br>
+ <span class="small">Poziom 1–2 • AKTYWNE</span></div>
+
+ <div class="item">🏰 <b>Word Castle</b><br>
+ <span class="small">Poziom 2–3 • AKTYWNE</span></div>
+
+ <div class="item locked">🏜️ <b>Past Desert</b><br>
+ <span class="small">Od poziomu 3</span></div>
+
+ <div class="item locked">🌋 <b>Past Volcano</b><br>
+ <span class="small">Od poziomu 5</span></div>
+
+ <div class="item locked">🏝️ <b>Perfect Island</b><br>
+ <span class="small">Od poziomu 8</span></div>
+
+ <div class="item locked">🐉 <b>Dragon Realm</b><br>
+ <span class="small">B1 • Od poziomu 20</span></div>
+
+ <div class="item">🎬 <b>Film Studio</b><br>
+ <span class="small">Specjalne questy dla videografa</span></div>
+
+ <div class="item">✈️ <b>Airport</b><br>
+ <span class="small">English Survival</span></div>
+</div>
+</div>
+
+<div id="shop" class="hidden">
+<div class="card">
+ <div class="sectionTitle">🏪 Sklep</div>
+
+ <div class="item">
+ ⚔️ <b>Grammar Sword</b><br>
+ <span class="small">+5 damage • 80 Gold</span>
+ </div>
+
+ <div class="item">
+ 📖 <b>Vocabulary Tome</b><br>
+ <span class="small">+10% XP • 100 Gold</span>
+ </div>
+
+ <div class="item">
+ 🧪 <b>XP Potion</b><br>
+ <span class="small">+25 XP • 120 Gold</span>
+ </div>
+
+ <div class="item">
+ 🛡️ <b>Shield</b><br>
+ <span class="small">Blocks next mistake • 150 Gold</span>
+ </div>
+</div>
+</div>
+
+<div id="hero" class="hidden">
+<div class="card">
+ <div class="sectionTitle">🧙 Twój bohater</div>
+
+ <div class="item">
+ 🎖️ <b>Level:</b> <span id="heroLevel">2</span>
+ </div>
+
+ <div class="item">
+ 📚 <b>Grammar</b> ⭐⭐
+ </div>
+
+ <div class="item">
+ 🗣️ <b>Speaking</b> ⭐
+ </div>
+
+ <div class="item">
+ 📖 <b>Vocabulary</b> ⭐
+ </div>
+
+ <div class="item">
+ 🎧 <b>Listening</b> ⭐
+ </div>
+
+ <div class="item">
+ 👻 <b>Haunted Mistakes:</b>
+ <span id="mistakes">0</span>
+ </div>
+
+ <div class="item">
+ 🎒 <b>Inventory</b><br>
+ <span id="inventory">Empty</span>
+ </div>
+</div>
+</div>
+
+</div>
+
+<script>
+
+const questions=[
+{
+ q:"She usually ___ football.",
+ a:["watch","watches","is watching","watching"],
+ c:1,
+ why:"„Usually” oznacza czynność powtarzalną, więc używamy Present Simple. Przy SHE czasownik dostaje końcówkę -s.",
+ remember:"SHE / HE / IT → usually WATCHES."
+},
+{
+ q:"I ___ a wedding film right now.",
+ a:["edit","edits","am editing","editing"],
+ c:2,
+ why:"„Right now” mówi, że czynność dzieje się w tej chwili. Używamy Present Continuous: am/is/are + czasownik-ing.",
+ remember:"RIGHT NOW → AM/IS/ARE + ING."
+},
+{
+ q:"We usually ___ on weekends.",
+ a:["work","works","are working","working"],
+ c:0,
+ why:"„Usually” wskazuje na rutynę. Przy WE nie dodajemy -s.",
+ remember:"I / YOU / WE / THEY → WORK."
+},
+{
+ q:"She ___ TV now.",
+ a:["watch","watches","is watching","watching"],
+ c:2,
+ why:"„Now” oznacza czynność trwającą w tej chwili. Potrzebujesz IS + czasownik-ing.",
+ remember:"SHE + NOW → SHE IS WATCHING."
+},
+{
+ q:"My friend ___ English every day.",
+ a:["study","studies","is studying","studying"],
+ c:1,
+ why:"„Every day” wskazuje na rutynę. Przy HE/SHE/IT czasownik dostaje końcówkę -s. Study zmienia się w studies.",
+ remember:"HE/SHE/IT → STUDIES."
+},
+{
+ q:"This week I ___ on three wedding videos.",
+ a:["work","works","am working","working"],
+ c:2,
+ why:"„This week” opisuje sytuację tymczasową. Naturalnie używamy Present Continuous.",
+ remember:"TEMPORARY / THIS WEEK → AM/IS/ARE + ING."
+},
+{
+ q:"Choose the correct sentence.",
+ a:[
+ "I usually work.",
+ "I usually am work.",
+ "I am usually work.",
+ "I usually working."
+ ],
+ c:0,
+ why:"Po „usually” używamy Present Simple. Zdanie „I usually work” jest poprawne.",
+ remember:"USUALLY + PRESENT SIMPLE."
+},
+{
+ q:"Jak po angielsku jest „obiektyw”?",
+ a:["camera","lens","screen","tripod"],
+ c:1,
+ why:"„Lens” oznacza obiektyw. „Camera” to aparat/kamera, a „tripod” to statyw.",
+ remember:"LENS = OBIEKTYW."
+},
+{
+ q:"Jak powiedzieć „montować film”?",
+ a:["make a camera","edit a film","watch a film","shoot a tripod"],
+ c:1,
+ why:"„Edit a film” oznacza montować film. „Shoot” oznacza nagrywać/filmować.",
+ remember:"EDIT = MONTAŻ / EDYCJA."
+},
+{
+ q:"He ___ football every Saturday.",
+ a:["play","plays","is playing","playing"],
+ c:1,
+ why:"„Every Saturday” opisuje regularną czynność. Przy HE potrzebujemy końcówki -s.",
+ remember:"HE + EVERY → PLAYS."
+}
+];
+
+const enemies=[
+ {name:"Grammar Goblin",emoji:"👺",hp:100},
+ {name:"Tense Troll",emoji:"👹",hp:150},
+ {name:"Vocabulary Vampire",emoji:"🧛",hp:130},
+ {name:"Sentence Wolf",emoji:"🐺",hp:180}
+];
+
+const S={
+ level:2,
+ xp:10,
+ gold:150,
+ hp:100,
+ combo:0,
+ qi:0,
+ enemy:0,
+ enemyHp:100,
+ mistakes:[],
+ inventory:[]
+};
+
+function $(id){return document.getElementById(id)}
+
+function updateStats(){
+ $("level").textContent=S.level;
+ $("heroLevel").textContent=S.level;
+ $("gold").textContent=S.gold;
+ $("hp").textContent=S.hp;
+ $("combo").textContent=S.combo;
+ $("mistakes").textContent=S.mistakes.length;
+ $("xpText").textContent=S.xp+" / 100 XP";
+ $("xpbar").style.width=S.xp+"%";
+ $("inventory").textContent=S.inventory.length
+   ? S.inventory.join(", ")
+   : "Empty";
+}
+
+function newEnemy(){
+ let e=enemies[S.enemy%enemies.length];
+ S.enemyHp=e.hp;
+ $("enemyEmoji").textContent=e.emoji;
+ $("enemyName").textContent=e.name;
+ updateEnemy();
+}
+
+function updateEnemy(){
+ let e=enemies[S.enemy%enemies.length];
+ $("enemyHP").style.width=(S.enemyHp/e.hp*100)+"%";
+ $("enemyText").textContent=S.enemyHp+" / "+e.hp+" HP";
+}
+
+function question(){
+
+ let q=questions[S.qi%questions.length];
+
+ $("question").textContent=q.q;
+
+ $("feedback").innerHTML="";
+
+ $("answers").innerHTML=q.a.map((x,i)=>
+ `<button class="answer" onclick="answer(${i})">${x}</button>`
+ ).join("");
+
+ if(S.qi%4===0 && S.qi>0){
+   S.enemy++;
+   newEnemy();
+ }else{
+   updateEnemy();
+ }
+
+ updateStats();
+}
+
+function answer(i){
+
+ let q=questions[S.qi%questions.length];
+
+ document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+
+ if(i===q.c){
+
+   S.combo++;
+
+   let damage=20;
+
+   if(S.combo>=5) damage+=15;
+
+   S.enemyHp-=damage;
+
+   let gain=S.combo>=3?15:10;
+
+   S.xp+=gain;
+   S.gold+=10;
+
+   if(S.xp>=100){
+     S.xp-=100;
+     S.level++;
+     S.gold+=50;
+   }
+
+   $("feedback").innerHTML=`
+   <div class="feedback good">
+   ✅ <b>PERFECT HIT!</b><br>
+   ⚔️ Damage: ${damage}<br>
+   ⭐ +${gain} XP<br>
+   💰 +10 Gold<br>
+   🔥 Combo x${S.combo}
+   </div>`;
+
+   updateStats();
+   updateEnemy();
+
+   if(S.enemyHp<=0){
+
+     S.gold+=40;
+     S.xp+=20;
+
+     $("feedback").innerHTML+=`
+     <div class="feedback good">
+     🏆 <b>ENEMY DEFEATED!</b><br>
+     💰 +40 Gold<br>
+     ⭐ +20 XP<br>
+     🎁 You found a chest!
+     <button class="next" onclick="chest()">🎁 Open Chest</button>
+     </div>`;
+
+     updateStats();
+
+   }else{
+
+     setTimeout(()=>{
+       S.qi++;
+       question();
+     },900);
+
+   }
+
+ }else{
+
+   let lost=15;
+
+   S.combo=0;
+   S.hp-=lost;
+
+   S.mistakes.push({
+     question:q.q,
+     correct:q.a[q.c]
+   });
+
+   $("feedback").innerHTML=`
+   <div class="feedback bad">
+
+   ❌ <b>WRONG ANSWER</b>
+
+   <br><br>
+
+   👺 <b>Monster attacks!</b><br>
+   ❤️ -${lost} HP
+
+   <br><br>
+
+   ❌ <b>Your answer:</b><br>
+   ${q.a[i]}
+
+   <br><br>
+
+   ✅ <b>Correct answer:</b><br>
+   ${q.a[q.c]}
+
+   <br><br>
+
+   📖 <b>Why?</b><br>
+   ${q.why}
+
+   <br><br>
+
+   🧠 <b>Remember:</b><br>
+   ${q.remember}
+
+   <br><br>
+
+   👻 This mistake has been added to <b>Haunted Mistakes</b>.
+
+   </div>
+
+   <button class="next" onclick="nextQuestion()">
+   ➡️ Następne pytanie
+   </button>
+   `;
+
+   updateStats();
+
+   if(S.hp<=0){
+      S.hp=0;
+
+      $("feedback").innerHTML+=`
+      <div class="feedback bad">
+      ☠️ <b>YOU DIED</b><br>
+      Musisz odpocząć przed kolejną walką.
+      <button class="next" onclick="revive()">❤️ Revive</button>
+      </div>`;
+   }
+ }
+}
+
+function nextQuestion(){
+ S.qi++;
+ question();
+}
+
+function revive(){
+ S.hp=100;
+ S.gold=Math.max(0,S.gold-25);
+ S.combo=0;
+ S.qi++;
+ question();
+}
+
+function chest(){
+
+ let loot=[
+   ["⚪ Common","🧪 Small XP Potion"],
+   ["🟢 Uncommon","⚔️ Training Blade"],
+   ["🔵 Rare","📖 Grammar Codex"],
+   ["🟣 Epic","💍 Combo Ring"],
+   ["🟠 Legendary","⚔️ English Excalibur"],
+   ["🔴 Mythic","🐉 Dragon Tongue"]
+ ];
+
+ let r=Math.random();
+
+ let index=
+   r<.45?0:
+   r<.72?1:
+   r<.88?2:
+   r<.96?3:
+   r<.995?4:5;
+
+ let item=loot[index];
+
+ S.inventory.push(item[1]);
+
+ $("feedback").innerHTML=`
+ <div class="feedback good">
+ 🎁 <b>CHEST OPENED!</b><br><br>
+ ✨ Rarity: <b>${item[0]}</b><br>
+ 🎒 Loot: <b>${item[1]}</b>
+ </div>
+
+ <button class="next" onclick="nextQuestion()">
+ ⚔️ Następna walka
+ </button>`;
+
+ updateStats();
+}
+
+function showTab(tab,button){
+
+ ["battle","map","shop","hero"].forEach(x=>{
+   $(x).classList.add("hidden");
+ });
+
+ $(tab).classList.remove("hidden");
+
+ document.querySelectorAll(".tab").forEach(x=>{
+   x.classList.remove("active");
+ });
+
+ button.classList.add("active");
+}
+
+newEnemy();
+question();
+
+</script>
+</body>
+</html>
